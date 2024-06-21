@@ -1,3 +1,4 @@
+v0.3.0 - expose stats on server
 v0.2.1 - fix spacing on banner for SMTPUTF8
 v0.2.0 - add dummy support for SMTPUTF8
 v0.1.0 - Fork of github.com/mhale/smtpd v0.8.x
