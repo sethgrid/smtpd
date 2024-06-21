@@ -357,6 +357,7 @@ loop:
 		}
 
 		verb, args := s.parseLine(line)
+		args = strings.TrimSpace(args)
 
 		switch verb {
 		case "HELO":
@@ -385,6 +386,13 @@ loop:
 			if s.srv.AuthHandler != nil && s.srv.AuthRequired && !s.authenticated {
 				s.writef("530 5.7.0 Authentication required")
 				break
+			}
+
+			// RFC 6531, ex:
+			// MAIL FROM:<jose@example.com> SMTPUTF8
+			// we trim off the suffix and always use utf-8 already
+			if strings.HasSuffix(args, "SMTPUTF8") {
+				args = strings.TrimSuffix(args, " SMTPUTF8")
 			}
 
 			match := mailFromRE.FindStringSubmatch(args)
@@ -840,7 +848,8 @@ func (s *session) makeEHLOResponse() (response string) {
 		}
 	}
 
-	response += "250 ENHANCEDSTATUSCODES"
+	// to support smtputf8, we must also support 8bitmime. Note, these are untested as of yet.
+	response += "250 ENHANCEDSTATUSCODES\r\n 250 SMTPUTF8\r\n250 8BITMIME"
 	return
 }
 

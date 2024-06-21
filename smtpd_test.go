@@ -139,6 +139,8 @@ func TestCmdMAIL(t *testing.T) {
 	cmdCode(t, conn, "MAIL FROM:<>", "250")
 	// MAIL with valid FROM arg should return 250 Ok
 	cmdCode(t, conn, "MAIL FROM:<sender@example.com>", "250")
+	// MAIL with valid FROM arg with SMTPUTF8 suffix should return 250 Ok
+	cmdCode(t, conn, "MAIL FROM:<sender@example.com> SMTPUTF8", "250")
 
 	// MAIL with seemingly valid but noncompliant FROM arg (single space after the colon) should be tolerated and should return 250 Ok
 	cmdCode(t, conn, "MAIL FROM: <sender@example.com>", "250")
