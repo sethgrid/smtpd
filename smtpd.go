@@ -105,10 +105,11 @@ type Server struct {
 	TLSListener       bool // Listen for incoming TLS connections only (not recommended as it may reduce compatibility). Ignored if TLS is not configured.
 	TLSRequired       bool // Require TLS for every command except NOOP, EHLO, STARTTLS, or QUIT as per RFC 3207. Ignored if TLS is not configured.
 
-	inShutdown   int32 // server was closed or shutdown
-	openSessions int32 // count of open sessions
-	mu           sync.Mutex
-	shutdownChan chan struct{} // let the sessions know we are shutting down
+	inShutdown       int32 // server was closed or shutdown
+	openSessions     int32 // count of open sessions
+	lifetimeSessions int32 // count of open sessions ever
+	mu               sync.Mutex
+	shutdownChan     chan struct{} // let the sessions know we are shutting down
 
 	XClientAllowed []string // List of XCLIENT allowed IP addresses
 }
@@ -217,6 +218,8 @@ func (srv *Server) Serve(ln net.Listener) error {
 
 		session := srv.newSession(conn)
 		atomic.AddInt32(&srv.openSessions, 1)
+		atomic.AddInt32(&srv.lifetimeSessions, 1)
+
 		go session.serve()
 	}
 }
@@ -299,6 +302,18 @@ func (srv *Server) Close() error {
 	atomic.StoreInt32(&srv.inShutdown, 1)
 	srv.closeShutdownChan()
 	return nil
+}
+
+func (srv *Server) OpenSessionCount() int {
+	return int(atomic.LoadInt32(&srv.openSessions))
+}
+
+func (srv *Server) LifetimeSessionCount() int {
+	return int(atomic.LoadInt32(&srv.lifetimeSessions))
+}
+
+func (srv *Server) Stats() string {
+	return fmt.Sprintf("Open Sessions: %d, Lifetime Sessions: %d", srv.OpenSessionCount(), srv.LifetimeSessionCount())
 }
 
 // Shutdown - waits for current sessions to complete before closing
