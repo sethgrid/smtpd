@@ -51,7 +51,7 @@ var ErrServerClosed = errors.New("Server has been closed")
 // and then calls Serve with handler to handle requests
 // on incoming connections.
 func ListenAndServe(addr string, handler Handler, appname string, hostname string) error {
-	srv := &Server{Addr: addr, Handler: handler, Appname: appname, Hostname: hostname}
+	srv := &Server{Addr: addr, Handler: handler, Appname: appname, Hostname: hostname, startTime: time.Now()}
 	return srv.ListenAndServe()
 }
 
@@ -59,7 +59,7 @@ func ListenAndServe(addr string, handler Handler, appname string, hostname strin
 // and then calls Serve with handler to handle requests
 // on incoming connections. Connections may be upgraded to TLS if the client requests it.
 func ListenAndServeTLS(addr string, certFile string, keyFile string, handler Handler, appname string, hostname string) error {
-	srv := &Server{Addr: addr, Handler: handler, Appname: appname, Hostname: hostname}
+	srv := &Server{Addr: addr, Handler: handler, Appname: appname, Hostname: hostname, startTime: time.Now()}
 	err := srv.ConfigureTLS(certFile, keyFile)
 	if err != nil {
 		return err
@@ -112,6 +112,7 @@ type Server struct {
 	shutdownChan     chan struct{} // let the sessions know we are shutting down
 
 	XClientAllowed []string // List of XCLIENT allowed IP addresses
+	startTime      time.Time
 }
 
 // ConfigureTLS creates a TLS configuration from certificate and key files.
@@ -312,8 +313,12 @@ func (srv *Server) LifetimeSessionCount() int {
 	return int(atomic.LoadInt32(&srv.lifetimeSessions))
 }
 
-func (srv *Server) Stats() string {
-	return fmt.Sprintf("Open Sessions: %d, Lifetime Sessions: %d", srv.OpenSessionCount(), srv.LifetimeSessionCount())
+func (srv *Server) Stats() map[string]any {
+	return map[string]any{
+		"open_sessions":     srv.OpenSessionCount(),
+		"lifetime_sessions": srv.LifetimeSessionCount(),
+		"uptime":            time.Since(srv.startTime).String(),
+	}
 }
 
 // Shutdown - waits for current sessions to complete before closing
