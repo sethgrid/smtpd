@@ -51,7 +51,7 @@ var ErrServerClosed = errors.New("Server has been closed")
 // and then calls Serve with handler to handle requests
 // on incoming connections.
 func ListenAndServe(addr string, handler Handler, appname string, hostname string) error {
-	srv := &Server{Addr: addr, Handler: handler, Appname: appname, Hostname: hostname, startTime: time.Now()}
+	srv := &Server{Addr: addr, Handler: handler, Appname: appname, Hostname: hostname, StartTime: time.Now()}
 	return srv.ListenAndServe()
 }
 
@@ -59,7 +59,7 @@ func ListenAndServe(addr string, handler Handler, appname string, hostname strin
 // and then calls Serve with handler to handle requests
 // on incoming connections. Connections may be upgraded to TLS if the client requests it.
 func ListenAndServeTLS(addr string, certFile string, keyFile string, handler Handler, appname string, hostname string) error {
-	srv := &Server{Addr: addr, Handler: handler, Appname: appname, Hostname: hostname, startTime: time.Now()}
+	srv := &Server{Addr: addr, Handler: handler, Appname: appname, Hostname: hostname, StartTime: time.Now()}
 	err := srv.ConfigureTLS(certFile, keyFile)
 	if err != nil {
 		return err
