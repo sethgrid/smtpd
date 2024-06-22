@@ -864,7 +864,7 @@ func (s *session) makeEHLOResponse() (response string) {
 	}
 
 	// to support smtputf8, we must also support 8bitmime. Note, these are untested as of yet.
-	response += "250-ENHANCEDSTATUSCODES\r\n250-SMTPUTF8\r\n250-8BITMIME"
+	response += "250-ENHANCEDSTATUSCODES\r\n250-SMTPUTF8\r\n250 8BITMIME"
 	return
 }
 
