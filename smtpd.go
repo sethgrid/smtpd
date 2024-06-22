@@ -112,7 +112,7 @@ type Server struct {
 	shutdownChan     chan struct{} // let the sessions know we are shutting down
 
 	XClientAllowed []string // List of XCLIENT allowed IP addresses
-	startTime      time.Time
+	StartTime      time.Time
 }
 
 // ConfigureTLS creates a TLS configuration from certificate and key files.
@@ -317,7 +317,7 @@ func (srv *Server) Stats() map[string]any {
 	return map[string]any{
 		"open_sessions":     srv.OpenSessionCount(),
 		"lifetime_sessions": srv.LifetimeSessionCount(),
-		"uptime":            time.Since(srv.startTime).String(),
+		"uptime":            time.Since(srv.StartTime).String(),
 	}
 }
 
